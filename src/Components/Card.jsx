@@ -1,20 +1,70 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { ContextGlobal } from "./utils/global.context";
 
 
-const Card = ({ name, username, id }) => {
 
-  const addFav = ()=>{
-    // Aqui iria la logica para agregar la Card en el localStorage
-  }
+const Card = (props) => {
+  const { addFav, removeFav} = useContext(ContextGlobal);
+
+  const location = useLocation();
+
+  const [faved, isFaved] = useState(false);
+
+  useEffect(() => {
+    setIsSolid(props.dentist.isFav);
+  }, [props.dentist.isFav]);
+
+  const favs = JSON.parse(localStorage.getItem("favData")) || [];
+
+  useEffect(() => {
+    if (favs) {
+      const isDentistFav = favs.some((fav) => fav.id === props.dentist.id);
+      isFaved(isDentistFav);
+    }
+  }, [props.dentist.id, favs]);
+
+  const handleFav = () => {
+    addFav({ ...props.dentist, isFav: true });
+    isFaved(true);
+  };
+
+  const handleDeleteFav = () => {
+    removeFav(props.dentist.id);
+  };
+
+  const isFavPage = location.pathname === "/favs";
+
+  const [isSolid, setIsSolid] = useState(props.dentist.isFav);
 
   return (
     <div className="card">
-        {/* En cada card deberan mostrar en name - username y el id */}
+      <h1>{props.dentist.username}</h1>
+      <h4>{props.dentist.name}</h4>
+      <p>{props.dentist.id}</p>
 
-        {/* No debes olvidar que la Card a su vez servira como Link hacia la pagina de detalle */}
+      <Link className="col" to={`detail/${props.dentist.id}`} id="detail-link">
+        Ir al detalle
+      </Link>
 
-        {/* Ademas deberan integrar la logica para guardar cada Card en el localStorage */}
-        <button onClick={addFav} className="favButton">Add fav</button>
+      {!isFavPage ? (
+        <button
+          onClick={handleFav}
+          className="favButton"
+          id="btnStar"
+          disabled={faved}
+        >
+    
+        </button>
+      ) : (
+        <button
+          onClick={isFavPage ? handleDeleteFav : handleFav}
+          className="favButton"
+          id="btnStar"
+        >
+          
+        </button>
+      )}
     </div>
   );
 };
